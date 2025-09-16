@@ -6,6 +6,7 @@ const Header = () => {
   const navigationLinks = [
     { label: "Home", Path: "/" },
     { label:"WishList" ,Path:"/wishlist"},
+    { label: "AI Search", Path: "/ai-search" },
     { label: "About", Path: "/about" },
     { label: "Feedback", Path: "/feedback" },
     { label: "Contact", Path: "/contact" },

@@ -11,6 +11,7 @@ import Feedback from "./components/Feedback/Feedback";
 import SignUp from "./components/SignUp/SignUp";
 import SignIn from "./components/SignIn/Signin";
 import WishList from "./components/Wishlist/WishList";
+import AISearch from "./components/AISearch/AISearch";
 import { useState } from "react";
 
 const App = () => {
@@ -46,6 +47,7 @@ const App = () => {
               <WishList wishlist={wishlist} onRemoveItem={handleRemoveItem} />
             }
           />
+          <Route path="/ai-search" element={<AISearch />} />
           <Route path="/about" element={<About />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/contact" element={<Contact />} />
