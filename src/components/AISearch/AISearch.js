@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch, faUpload, faTimes, faStar, faStarHalfAlt } from "@fortawesome/free-solid-svg-icons";
 import GeminiService from "../../services/GeminiService";
+import { searchImages } from "../../services/ImageSearchService";
 import "./AISearch.css";
 
 const AISearch = () => {
@@ -24,25 +25,17 @@ const AISearch = () => {
     setIsSearching(true);
     
     try {
-      // Set the API key for the Gemini service
-      GeminiService.setApiKey(GEMINI_API_KEY);
-      
-      let response;
-      if (uploadedImages.length > 0) {
-        // If images are uploaded, use them in the search
-        const imageFiles = uploadedImages.map(img => img.file);
-        response = await GeminiService.searchWithTextAndImages(searchQuery, imageFiles);
-      } else {
-        // Text-only search
-        response = await GeminiService.searchWithText(searchQuery);
-      }
-      
-      setSearchResults(response.products);
-      setAiExplanation(response.explanation);
-      setSuggestions(response.suggestions || []);
-      setSuggestionText(response.suggestionText || "");
+      // Use the new image search service for prompt-based image results
+      const imageResults = searchImages(searchQuery);
+      setSearchResults(imageResults);
+      setAiExplanation(
+        imageResults.length > 0
+          ? `Found ${imageResults.length} matching images for your prompt.`
+          : "No matching images found. Try a different prompt."
+      );
+      setSuggestions([]);
+      setSuggestionText("");
     } catch (error) {
-      console.error("Error searching with Gemini:", error);
       setAiExplanation("Sorry, there was an error processing your search. Please try again.");
     } finally {
       setIsSearching(false);

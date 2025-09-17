@@ -280,6 +280,77 @@ const ADDITIONAL_PRODUCTS = [
 // Combine all products
 const ALL_PRODUCTS = [...PRODUCT_DATA, ...ADDITIONAL_PRODUCTS];
 
+// Dynamically load all images from the public/png images folder
+// This function will scan the folder and create product objects for each image
+// NOTE: In a real app, you would fetch this list from a backend or use require.context in webpack
+// For demo, let's add a helper to generate products from image filenames
+
+function generateProductsFromImages(imageNames) {
+  return imageNames.map((filename) => {
+    // Only add product if image file exists
+    return {
+      brand: "AI Search",
+      name: filename
+        .replace(/[-_]/g, ' ')
+        .replace(/\.(jpg|jpeg|png|webp)$/i, '')
+        .replace(/\s*–.*$/, '')
+        .replace(/\s+/g, ' ')
+        .trim(),
+      img_url: `/png-images/${filename}`,
+      price: "999",
+      category: "ai",
+      rating: 4.5,
+      no_of_rating: 10,
+      sizes: [],
+      description: `AI result for ${filename}`,
+      color: "",
+      type: "ai"
+    };
+  }).filter(product => product.img_url && product.img_url !== '/png-images/'); // Filter out missing images
+}
+
+// Example: Add all images in the folder to ALL_PRODUCTS
+// You must manually list the image filenames here, or fetch from backend
+const PUBLIC_IMAGE_NAMES = [
+  "beige-knit-sweater--cozy-autumn-minimal.jpg",
+  "black-beanie--winter-streetwear-cozy.jpeg",
+  "black-cargo-pants--streetwear-utility-edgy.jpg",
+  "black-combat-boots--edgy-winter-rainy.webp",
+  "black-graphic-hoodie--streetwear-winter-rainy-cozy.webp",
+  "black-satin-slip-dress--party-night-out-chic.jpg",
+  "boho-fringe-bag--aesthetic-indie-casual.webp",
+  "bucket-hat-beige--summer-aesthetic-casual.jpg",
+  "chunky-dad-sneakers--streetwear-trendy-genz.jpg",
+  "chunky-hoop-earrings--party-bold-trendy.jpg",
+  "cozy-wool-scarf--winter-cozy-minimal.jpeg",
+  "cropped-sweatshirt--casual-sporty-cozy.webp",
+  "denim-jacket--college-casual-timeless.jpeg",
+  "ethnic-dupatta-with-mirror-work--festive-traditional-chic.jpg",
+  "floral-midi-skirt--summer-aesthetic-brunch.jpg",
+  "floral-print-maxi-dress--vacation-aesthetic-flowy.jpeg",
+  "glittery-heels--party-night-out-chic.jpeg",
+  "glow-in-the-dark-sneakers--party-rave-edgy.jpg",
+  "grey-joggers--cozy-sporty-casual.jpg",
+  "high-waist-ripped-jeans--streetwear-casual-college.jpg",
+  "indo-western-fusion-kurti--college-ethnic-modern-casual.webp",
+  "leather-biker-jacket--edgy-party-streetwear.jpg",
+  "mini-pastel-backpack--college-pastel-casual.jpg",
+  "neon-green-tank-top--party-gym-bold.webp",
+  "oversized-blanket-hoodie--winter-cozy-indoor.jpg",
+  "oversized-blazer--formal-chic-streetwear-mix.jpg",
+  "oversized-plaid-shirt--casual-cozy-college.jpg",
+  "oversized-round-sunglasses--summer-vacation-genz.jpg",
+  "oversized-tote-bag--chic-minimal-work.jpg",
+  "oversized-white-t-shirt--casual-streetwear-college.webp",
+  "pastel-blue-crop-top--pastel-summer-chic.webp",
+  "transparent-raincoat--rainy-monsoon-utility.webp",
+  "transparent-umbrella--rainy-monsoon-utility.webp"
+  // ...add more filenames as needed
+];
+
+const AI_IMAGE_PRODUCTS = generateProductsFromImages(PUBLIC_IMAGE_NAMES);
+ALL_PRODUCTS.push(...AI_IMAGE_PRODUCTS);
+
 // Initialize the Gemini API - in production, this would need your API key
 class GeminiService {
   constructor(apiKey) {
@@ -445,15 +516,20 @@ class GeminiService {
           }
         }
         // Text-only search patterns
-        else if (queryLower.includes("rainy day") || queryLower.includes("rain")) {
-          // For rainy day outfit queries
-          relevantProducts = ALL_PRODUCTS.filter(product => 
-            product.category === "accessories" || 
-            product.name.toLowerCase().includes("shoes") ||
-            product.name.toLowerCase().includes("jacket")
-          ).slice(0, 3);
-          
-          explanation = "I've selected items that would be practical for rainy weather while maintaining style. These include accessories and footwear that can keep you dry and comfortable.";
+        else if (queryLower.includes("rainy day") || queryLower.includes("rain") || queryLower.includes("umbrella") || queryLower.includes("waterproof")) {
+          // For rainy day outfit queries, include AI image products with relevant keywords
+          relevantProducts = ALL_PRODUCTS.filter(product => {
+            const text = `${product.name.toLowerCase()} ${product.description.toLowerCase()} ${product.img_url.toLowerCase()}`;
+            return (
+              text.includes("rain") ||
+              text.includes("rainy") ||
+              text.includes("umbrella") ||
+              text.includes("waterproof") ||
+              text.includes("jacket") ||
+              text.includes("boots")
+            );
+          }).slice(0, 5);
+          explanation = "I've selected items that would be practical for rainy weather, including raincoats, umbrellas, waterproof bags, boots, and cozy outfits.";
         } 
         else if (queryLower.includes("saree") && queryLower.includes("pastel")) {
           // Specifically for pastel saree queries
